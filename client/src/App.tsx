@@ -9,10 +9,7 @@ import { User } from './types';
 function App() {
   const [currentUser, setCurrentUser] = useState<User | null>(null);
 
-  // BUG-023 (Medium / TypeScript): Non-null assertion on currentUser before
-  // it has been verified non-null. On first render currentUser is null, so
-  // this call will receive NaN/undefined as userId and produce a runtime error.
-  const { tasks, loading, error, deleteTask, completeTask } = useTasks(currentUser!.id);
+  const { tasks, loading, error, deleteTask, completeTask } = useTasks(currentUser?.id ?? 0);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('user');
@@ -38,10 +35,10 @@ function App() {
   return (
     <div style={{ padding: '24px' }}>
       <UserProfile userId={currentUser.id} />
-      <TaskForm currentUserId={currentUser.id} onTaskCreated={() => {}} />
+      <TaskForm currentUserId={currentUser.id} onTaskCreated={() => { }} />
 
       {loading && <p>Loading tasks…</p>}
-      {error   && <p style={{ color: 'red' }}>Error: {error}</p>}
+      {error && <p style={{ color: 'red' }}>Error: {error}</p>}
 
       {/* BUG-027 (Low / Performance): Object literal `{ status: 'pending' }`
           is a new reference on every render of App. TaskList always sees a

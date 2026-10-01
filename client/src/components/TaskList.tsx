@@ -14,7 +14,7 @@ interface Props {
 
 function TaskList({ tasks, onDelete, onComplete, filters = {} }: Props) {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const [windowWidth, setWindowWidth]  = useState(window.innerWidth);
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   // BUG-015 (Medium / React): Event listener registered but never cleaned up.
   // Every TaskList mount leaks a 'resize' listener. After multiple mounts
@@ -26,13 +26,15 @@ function TaskList({ tasks, onDelete, onComplete, filters = {} }: Props) {
     // Missing: return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // BUG-035 (Medium / React): async function passed directly to useEffect.
-  // React ignores the returned Promise, so the implicit cleanup return is
-  // lost. The lint rule react-hooks/exhaustive-deps also flags this pattern.
-  useEffect(async () => {
-    const data = await fetch('/api/tasks/stats').then(r => r.json());
-    console.log('Task stats:', data);
-  } as any, [tasks]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const data = await fetch('/api/tasks/stats').then(r => r.json());
+      if (!cancelled) console.log('Task stats:', data);
+    })();
+
+    return () => { cancelled = true; };
+  }, [tasks]);
 
   const handleSelectAll = () => {
     // BUG-013 (High / React): Calling push() on the state array directly —

@@ -8,11 +8,13 @@ interface Props {
 }
 
 function LoginForm({ onLogin }: Props) {
-  const [email, setEmail]       = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError]       = useState('');
+  const [error, setError] = useState('');
 
-  const handleLogin = async () => {
+  const handleLogin = async (event: React.FormEvent) => {
+    event.preventDefault();
+
     try {
       const data = await api.login(email, password);
 
@@ -34,7 +36,7 @@ function LoginForm({ onLogin }: Props) {
   };
 
   return (
-    <div>
+    <form onSubmit={(e) => handleLogin(e)}>
       {/* BUG-008 (Critical / Security): Error message rendered as raw HTML.
           If the server ever returns HTML in the error body, or if `error`
           is set from an untrusted source, this is an XSS vector. */}
@@ -59,8 +61,8 @@ function LoginForm({ onLogin }: Props) {
 
       {/* BUG-017 (Medium / Logic): No keyboard/Enter submit. The form has no
           onSubmit handler so pressing Enter does nothing — mouse-only UX. */}
-      <button onClick={handleLogin}>Log In</button>
-    </div>
+      <button type='submit'>Log In</button>
+    </form>
   );
 }
 

@@ -7,7 +7,7 @@ interface Props {
 }
 
 function UserProfile({ userId }: Props) {
-  const [user, setUser]     = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -38,10 +38,6 @@ function UserProfile({ userId }: Props) {
     <div>
       <h2>{user!.name}</h2>
       <p>{user!.email}</p>
-
-      {/* BUG-019 (High / Security): Displaying the raw password field returned
-          by the API. Even as a hash this should never appear in the UI. */}
-      {user!.password && <p style={{ color: 'red' }}>Password hash: {user!.password}</p>}
 
       {/* BUG-022 (Medium / TypeScript): Casting to `any` to access a property
           that was never declared — silently undefined at runtime. */}

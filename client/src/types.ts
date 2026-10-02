@@ -14,13 +14,10 @@ export interface Task {
   updatedAt: string;
 }
 
-// BUG-019 (High / Security): The password field should never exist on a
-// frontend type. Its presence normalises treating it as safe to display.
 export interface User {
   id: number;
   name: string;
   email: string;
-  password?: string;
 }
 
 // BUG-022 (Medium / TypeScript): `data: any` gives up all type safety for

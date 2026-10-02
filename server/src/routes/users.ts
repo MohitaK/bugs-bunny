@@ -18,7 +18,6 @@ router.get('/search', async (req: Request, res: Response) => {
 
 // BUG-003 (Critical / Security): Password stored in plain text — no bcrypt.
 // BUG-018 (Medium / API): Returns HTTP 200 instead of 201 on resource creation.
-// BUG-019 (High / Security): Full user row (including password) sent to client.
 // BUG-028 (Medium / Logic): No input validation — title/email/password can be
 //   empty, null, or arbitrarily long.
 router.post('/register', async (req: Request, res: Response) => {
@@ -26,7 +25,7 @@ router.post('/register', async (req: Request, res: Response) => {
     const { name, email, password } = req.body;
 
     const result = await pool.query(
-      'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING *',
+      'INSERT INTO users (name, email, password) VALUES ($1, $2, $3) RETURNING id, name, email',
       [name, email, password]
     );
 
@@ -37,13 +36,12 @@ router.post('/register', async (req: Request, res: Response) => {
 });
 
 // BUG-003 (Critical / Security): Comparing plain-text passwords directly.
-// BUG-019 (High / Security): Sends the full user row (password included) back.
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
 
     const result = await pool.query(
-      'SELECT * FROM users WHERE email = $1 AND password = $2',
+      'SELECT id, name, email FROM users WHERE email = $1 AND password = $2',
       [email, password]
     );
 
@@ -61,10 +59,9 @@ router.post('/login', async (req: Request, res: Response) => {
 });
 
 // BUG-017 (Medium / Logic): No try/catch on this async handler.
-// BUG-019 (High / Security): Returns password column.
 // BUG-021 (Low / Performance): SELECT *.
 router.get('/:id', authenticate, async (req: Request, res: Response) => {
-  const user = await pool.query('SELECT * FROM users WHERE id = $1', [req.params.id]);
+  const user = await pool.query('SELECT id, name, email FROM users WHERE id = $1', [req.params.id]);
   res.json(user.rows[0]);
 });
 
